@@ -11,7 +11,7 @@ This tool is designed to:
 - Validate customer details (e.g., IP address, subnet mask).
 - Generate firewall object names in the format `CustomerName_IPAddress_CIDR`.
 - Optionally add tags to objects, supporting multiple tags per customer.
-- Create a YAML file (`customers.yml`) that can be used in an Ansible playbook to push the configurations to Palo Alto firewalls.
+- Create a YAML file (`customers.yml`) that can be used in an Ansible playbook to push the configurations to Palo Alto Panorama.
 - **Ensure that duplicate `panos_address_object` names are not created.**
 
 ---
@@ -127,23 +127,23 @@ customers:
 ---
 
 ## 🔧 **Ansible Playbook Usage**
-The provided Ansible playbook (`add_customer.yml`) will use the generated `customers.yml` file to push configurations to the Palo Alto firewall.
+The provided Ansible playbook (`add_customer.yml`) will use the generated `customers.yml` file to push configurations to Palo Alto Panorama.
 
 ### **Ansible Playbook Example**
 ```yaml
 ---
-- name: Add new customers to Palo Alto Firewall
-  hosts: paloalto
+- name: Add new customers to Palo Alto Panorama
+  hosts: panorama
   connection: local
   gather_facts: no
 
   tasks:
-    - name: Add new customer entries
+    - name: Add new customer entries to Panorama
       panos_address_object:
         provider:
-          ip_address: "{{ firewall_ip }}"
-          username: "{{ firewall_username }}"
-          password: "{{ firewall_password }}"
+          ip_address: "{{ panorama_ip }}"
+          username: "{{ panorama_username }}"
+          password: "{{ panorama_password }}"
         name: "{{ item.ObjectName }}"
         value: "{{ item.CustomerIPAddress }}/{{ item.IPSubnetMask }}"
         description: "Customer Entry for {{ item.CustomerName }}"
@@ -154,16 +154,16 @@ The provided Ansible playbook (`add_customer.yml`) will use the generated `custo
 ---
 
 ## 📒 **Inventory File Example**
-Create an inventory file (`inventory`) to define your firewall:
+Create an inventory file (`inventory`) to define your Panorama instance:
 
 ```
-[paloalto]
-firewall.example.com
+[panorama]
+panorama.example.com
 
-[paloalto:vars]
-firewall_ip=192.168.0.1
-firewall_username=admin
-firewall_password=admin_password
+[panorama:vars]
+panorama_ip=192.168.0.2
+panorama_username=admin
+panorama_password=admin_password
 ```
 
 ## 🤝 **Contributing**
