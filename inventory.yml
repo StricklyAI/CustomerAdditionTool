@@ -1,0 +1,7 @@
+[paloalto]
+firewall.example.com
+
+[paloalto:vars]
+firewall_ip=192.168.0.1
+firewall_username=admin
+firewall_password=admin_password
