@@ -1,16 +1,16 @@
 ---
-- name: Add new customers to Palo Alto Firewall
-  hosts: paloalto
+- name: Add new customers to Palo Alto Panorama
+  hosts: panorama
   connection: local
   gather_facts: no
 
   tasks:
-    - name: Add new customer entries
+    - name: Add new customer entries to Panorama
       panos_address_object:
         provider:
-          ip_address: "{{ firewall_ip }}"
-          username: "{{ firewall_username }}"
-          password: "{{ firewall_password }}"
+          ip_address: "{{ panorama_ip }}"
+          username: "{{ panorama_username }}"
+          password: "{{ panorama_password }}"
         name: "{{ item.ObjectName }}"
         value: "{{ item.CustomerIPAddress }}/{{ item.IPSubnetMask }}"
         description: "Customer Entry for {{ item.CustomerName }}"
