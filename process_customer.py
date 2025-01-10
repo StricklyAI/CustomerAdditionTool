@@ -114,11 +114,14 @@ def collect_manual_input():
         tags = input("Enter Tags (comma-separated, or leave blank for none): ").strip()
         valid_tags = validate_tags(tags)
 
+        object_name = generate_object_name(name, ip_address, subnet_mask)
+
         customers.append({
             'CustomerName': name,
             'CustomerIPAddress': ip_address,
             'IPSubnetMask': subnet_mask,
-            'Tags': valid_tags
+            'Tags': valid_tags,
+            'ObjectName': object_name
         })
 
     return customers
@@ -145,6 +148,7 @@ def preview_and_edit(customers):
                 customer['IPSubnetMask'] = new_subnet_mask
             new_tags = input("Enter new Tags (comma-separated, leave blank to keep current): ").strip()
             customer['Tags'] = validate_tags(new_tags) if new_tags else customer['Tags']
+            customer['ObjectName'] = generate_object_name(customer['CustomerName'], customer['CustomerIPAddress'], customer['IPSubnetMask'])
 
         elif action == 'd':
             confirm = input("Are you sure you want to delete this customer? (y/n): ").strip().lower()
