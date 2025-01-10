@@ -1,6 +1,6 @@
 # Firewall Customer Addition Automation Tool
 
-This project automates the process of adding new customer objects to Palo Alto firewalls using Ansible and YAML. It provides a user-friendly way to input customer details either manually or through a CSV/Excel file. The script handles validation, generates firewall object names in a specific format, and outputs a structured YAML file for use with Ansible playbooks.
+This project automates the process of adding new customer objects to Palo Alto Panorama using Ansible and YAML. It provides a user-friendly way to input customer details either manually or through a CSV/Excel file. The script handles validation, generates firewall object names in a specific format, and outputs a structured YAML file for use with Ansible playbooks.
 
 ---
 
