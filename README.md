@@ -166,16 +166,6 @@ firewall_username=admin
 firewall_password=admin_password
 ```
 
----
-
-## 🛠 **Future Enhancements**
-- Add support for validating existing firewall objects to prevent duplicates.
-- Ensure that the script checks for existing `panos_address_object` names before creating new entries.
-- Allow saving progress during manual input and resuming later.
-- Include additional validations for public vs private IP ranges.
-
----
-
 ## 🤝 **Contributing**
 We welcome contributions! Please fork the repository and submit a pull request with your changes.
 
