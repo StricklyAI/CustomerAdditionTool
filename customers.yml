@@ -1,0 +1,11 @@
+customers:
+  - CustomerName: "CompanyA"
+    CustomerIPAddress: "192.168.1.1"
+    IPSubnetMask: "255.255.255.0"
+    Tags: ["MFT_Financial", "Custom_Tag1"]
+    ObjectName: "CompanyA_192.168.1.1_24"
+  - CustomerName: "CompanyB"
+    CustomerIPAddress: "192.168.2.1"
+    IPSubnetMask: "255.255.255.0"
+    Tags: ["MFT_IHA"]
+    ObjectName: "CompanyB_192.168.2.1_24"
