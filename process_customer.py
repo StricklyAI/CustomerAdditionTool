@@ -5,6 +5,7 @@ import ipaddress
 import logging
 from tqdm import tqdm
 import re
+from datetime import datetime
 
 # Set up logging to track the script's actions and errors
 logging.basicConfig(
@@ -176,6 +177,12 @@ def confirm_save(customers):
     confirm = input("\nDo you want to proceed with saving the data? (y/n): ").strip().lower()
     return confirm == 'y'
 
+# Generate the YAML file name dynamically
+def generate_yaml_filename(customers):
+    first_customer_name = customers[0]['CustomerName'].replace(" ", "_").lower()
+    timestamp = datetime.now().strftime("%H%M%S")
+    return f"customers_{first_customer_name}_{timestamp}.yml"
+
 # Main function to handle file input, manual input, and output
 def main():
     try:
@@ -195,9 +202,10 @@ def main():
         validated_customers = preview_and_edit(customers)
 
         if confirm_save(validated_customers):
-            with open('customers.yml', 'w') as file:
+            yaml_filename = generate_yaml_filename(validated_customers)
+            with open(yaml_filename, 'w') as file:
                 yaml.dump({'customers': validated_customers}, file)
-            print("\nCustomer data successfully saved to customers.yml.")
+            print(f"\nCustomer data successfully saved to {yaml_filename}.")
         else:
             print("Save operation cancelled.")
 
