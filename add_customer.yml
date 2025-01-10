@@ -1,0 +1,18 @@
+---
+- name: Add new customers to Palo Alto Firewall
+  hosts: paloalto
+  connection: local
+  gather_facts: no
+
+  tasks:
+    - name: Add new customer entries
+      panos_address_object:
+        provider:
+          ip_address: "{{ firewall_ip }}"
+          username: "{{ firewall_username }}"
+          password: "{{ firewall_password }}"
+        name: "{{ item.ObjectName }}"
+        value: "{{ item.CustomerIPAddress }}/{{ item.IPSubnetMask }}"
+        description: "Customer Entry for {{ item.CustomerName }}"
+        tag: "{{ item.Tags }}"
+      with_items: "{{ customers }}"
