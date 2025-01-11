@@ -14,6 +14,13 @@ logging.basicConfig(
     format='%(asctime)s - %(levelname)s - %(message)s'
 )
 
+# Value-to-Tag mapping
+tag_mapping = {
+    '20022': 'MFT_Financial',
+    '20024': 'MFT_Healthcare',
+    # Add more mappings as needed
+}
+
 # Convert subnet mask to CIDR notation (e.g., 255.255.255.0 -> 24)
 def subnet_mask_to_cidr(subnet_mask):
     try:
@@ -65,18 +72,6 @@ def validate_subnet_mask(subnet_mask):
         print(f"Invalid subnet mask: {subnet_mask}. Please enter a valid subnet mask (e.g., 255.255.255.0 or /24).")
         return False
 
-# Validate tags (ASCII alphanumeric, underscores, and dashes only)
-def validate_tags(tags):
-    pattern = re.compile(r'^[a-zA-Z0-9_-]+$')
-    valid_tags = []
-    for tag in tags.split(','):
-        tag = tag.strip()
-        if tag and pattern.fullmatch(tag):
-            valid_tags.append(tag)
-        elif tag:
-            print(f"Invalid tag: {tag}. Only alphanumeric characters, underscores, and dashes are allowed with no spaces.")
-    return valid_tags
-
 # Load customer data from file without headers
 def load_customer_file():
     while True:
@@ -87,14 +82,14 @@ def load_customer_file():
                 with open(file_path, 'r') as file:
                     for line in file:
                         fields = line.strip().split(',')
-                        if len(fields) < 3:
-                            print("Error: Each row must have at least CustomerName, CustomerIPAddress, and IPSubnetMask.")
+                        if len(fields) < 4:
+                            print("Error: Each row must have at least CustomerName, CustomerIPAddress, IPSubnetMask, and Value.")
                             continue
 
                         name = fields[0].strip()
                         ip_address = fields[1].strip()
                         subnet_mask = fields[2].strip()
-                        tags = fields[3].strip() if len(fields) > 3 else ''
+                        value = fields[3].strip()
 
                         # Validate IP address and subnet mask
                         if not validate_ip_address(ip_address):
@@ -102,15 +97,21 @@ def load_customer_file():
                         if not validate_subnet_mask(subnet_mask):
                             continue
 
-                        # Generate object name and validate tags
+                        # Generate object name
                         object_name = generate_object_name(name, ip_address, subnet_mask)
-                        valid_tags = validate_tags(tags)
+
+                        # Map value to tag
+                        tag = tag_mapping.get(value)
+                        if not tag:
+                            print(f"Warning: The tag for value '{value}' is undefined.")
+                            tag = input("Please enter a tag for this value, or leave it blank to skip: ").strip()
 
                         customers.append({
                             'CustomerName': name,
                             'CustomerIPAddress': ip_address,
                             'IPSubnetMask': subnet_mask,
-                            'Tags': valid_tags,
+                            'Value': value,
+                            'Tags': [tag] if tag else [],
                             'ObjectName': object_name
                         })
                 return customers
@@ -140,8 +141,11 @@ def collect_manual_input():
         while not validate_subnet_mask(subnet_mask):
             subnet_mask = input("Please enter a valid IP Subnet Mask (e.g., 255.255.255.0 or /24): ").strip()
 
-        tags = input("Enter Tags (comma-separated, or leave blank for none): ").strip()
-        valid_tags = validate_tags(tags)
+        value = input("Enter Value: ").strip()
+        tag = tag_mapping.get(value)
+        if not tag:
+            print(f"Warning: The tag for value '{value}' is undefined.")
+            tag = input("Please enter a tag for this value, or leave it blank to skip: ").strip()
 
         object_name = generate_object_name(name, ip_address, subnet_mask)
 
@@ -149,7 +153,8 @@ def collect_manual_input():
             'CustomerName': name,
             'CustomerIPAddress': ip_address,
             'IPSubnetMask': subnet_mask,
-            'Tags': valid_tags,
+            'Value': value,
+            'Tags': [tag] if tag else [],
             'ObjectName': object_name
         })
 
@@ -175,8 +180,14 @@ def preview_and_edit(customers):
             new_subnet_mask = input("Enter new IP Subnet Mask (leave blank to keep current): ").strip()
             if new_subnet_mask:
                 customer['IPSubnetMask'] = new_subnet_mask
-            new_tags = input("Enter new Tags (comma-separated, leave blank to keep current): ").strip()
-            customer['Tags'] = validate_tags(new_tags) if new_tags else customer['Tags']
+            new_value = input("Enter new Value (leave blank to keep current): ").strip()
+            if new_value:
+                customer['Value'] = new_value
+                new_tag = tag_mapping.get(new_value)
+                if not new_tag:
+                    print(f"Warning: The tag for value '{new_value}' is undefined.")
+                    new_tag = input("Please enter a tag for this value, or leave it blank to skip: ").strip()
+                customer['Tags'] = [new_tag] if new_tag else []
             customer['ObjectName'] = generate_object_name(customer['CustomerName'], customer['CustomerIPAddress'], customer['IPSubnetMask'])
 
         elif action == 'd':
