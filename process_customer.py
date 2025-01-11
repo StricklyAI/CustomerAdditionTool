@@ -87,7 +87,7 @@ def load_customer_file():
                             continue
 
                         name = fields[0].strip()
-                        sanitized_name = name.replace("'", "")
+                        sanitized_name = re.sub(r"[\s']", "", name)
 
                         ip_address = fields[1].strip()
                         subnet_mask = fields[2].strip()
@@ -128,7 +128,7 @@ def load_customer_file():
                         continue
 
                     name, ip_address, subnet_mask = [str(value).strip() for value in row[:3]]
-                    sanitized_name = name.replace("'", "")
+                    sanitized_name = re.sub(r"[\s']", "", name)
                     service = str(int(row[3])).strip() if len(row) > 3 and pd.notna(row[3]) else ''
 
                     # Validate IP address and subnet mask
@@ -164,6 +164,7 @@ def load_customer_file():
             choice = input("Would you like to enter the data manually instead? (y/n): ").strip().lower()
             if choice == 'y':
                 return collect_manual_input()
+
 
 # Collect manual input from the user
 def collect_manual_input():
