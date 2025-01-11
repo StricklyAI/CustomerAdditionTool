@@ -14,7 +14,7 @@ logging.basicConfig(
     format='%(asctime)s - %(levelname)s - %(message)s'
 )
 
-# Value-to-Tag mapping
+# Service-to-Tag mapping
 tag_mapping = {
     '20022': 'MFT_Financial',
     '20024': 'MFT_Healthcare',
@@ -83,13 +83,13 @@ def load_customer_file():
                     for line in file:
                         fields = line.strip().split(',')
                         if len(fields) < 4:
-                            print("Error: Each row must have at least CustomerName, CustomerIPAddress, IPSubnetMask, and Value.")
+                            print("Error: Each row must have at least CustomerName, CustomerIPAddress, IPSubnetMask, and Service.")
                             continue
 
                         name = fields[0].strip()
                         ip_address = fields[1].strip()
                         subnet_mask = fields[2].strip()
-                        value = fields[3].strip()
+                        service = fields[3].strip()
 
                         # Validate IP address and subnet mask
                         if not validate_ip_address(ip_address):
@@ -100,17 +100,16 @@ def load_customer_file():
                         # Generate object name
                         object_name = generate_object_name(name, ip_address, subnet_mask)
 
-                        # Map value to tag
-                        tag = tag_mapping.get(value)
+                        # Map service to tag
+                        tag = tag_mapping.get(service)
                         if not tag:
-                            print(f"Warning: The tag for value '{value}' is undefined.")
-                            tag = input("Please enter a tag for this value, or leave it blank to skip: ").strip()
+                            print(f"Warning: The tag for service '{service}' is undefined.")
+                            tag = input("Please enter a tag for this service, or leave it blank to skip: ").strip()
 
                         customers.append({
                             'CustomerName': name,
                             'CustomerIPAddress': ip_address,
                             'IPSubnetMask': subnet_mask,
-                            'Value': value,
                             'Tags': [tag] if tag else [],
                             'ObjectName': object_name
                         })
@@ -141,11 +140,11 @@ def collect_manual_input():
         while not validate_subnet_mask(subnet_mask):
             subnet_mask = input("Please enter a valid IP Subnet Mask (e.g., 255.255.255.0 or /24): ").strip()
 
-        value = input("Enter Value: ").strip()
-        tag = tag_mapping.get(value)
+        service = input("Enter Service: ").strip()
+        tag = tag_mapping.get(service)
         if not tag:
-            print(f"Warning: The tag for value '{value}' is undefined.")
-            tag = input("Please enter a tag for this value, or leave it blank to skip: ").strip()
+            print(f"Warning: The tag for service '{service}' is undefined.")
+            tag = input("Please enter a tag for this service, or leave it blank to skip: ").strip()
 
         object_name = generate_object_name(name, ip_address, subnet_mask)
 
@@ -153,7 +152,6 @@ def collect_manual_input():
             'CustomerName': name,
             'CustomerIPAddress': ip_address,
             'IPSubnetMask': subnet_mask,
-            'Value': value,
             'Tags': [tag] if tag else [],
             'ObjectName': object_name
         })
@@ -180,13 +178,12 @@ def preview_and_edit(customers):
             new_subnet_mask = input("Enter new IP Subnet Mask (leave blank to keep current): ").strip()
             if new_subnet_mask:
                 customer['IPSubnetMask'] = new_subnet_mask
-            new_value = input("Enter new Value (leave blank to keep current): ").strip()
-            if new_value:
-                customer['Value'] = new_value
-                new_tag = tag_mapping.get(new_value)
+            new_service = input("Enter new Service (leave blank to keep current): ").strip()
+            if new_service:
+                new_tag = tag_mapping.get(new_service)
                 if not new_tag:
-                    print(f"Warning: The tag for value '{new_value}' is undefined.")
-                    new_tag = input("Please enter a tag for this value, or leave it blank to skip: ").strip()
+                    print(f"Warning: The tag for service '{new_service}' is undefined.")
+                    new_tag = input("Please enter a tag for this service, or leave it blank to skip: ").strip()
                 customer['Tags'] = [new_tag] if new_tag else []
             customer['ObjectName'] = generate_object_name(customer['CustomerName'], customer['CustomerIPAddress'], customer['IPSubnetMask'])
 
