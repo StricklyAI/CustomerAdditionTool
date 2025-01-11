@@ -92,10 +92,13 @@ def load_customer_file():
                         service = fields[3].strip() if len(fields) > 3 else ''
 
                         # Validate IP address and subnet mask
-                        if not validate_ip_address(ip_address):
-                            continue
-                        if not validate_subnet_mask(subnet_mask):
-                            continue
+                        while not validate_ip_address(ip_address):
+                            print(f"Invalid IP address detected: {ip_address}")
+                            ip_address = input("Please enter a valid IP Address: ").strip()
+
+                        while not validate_subnet_mask(subnet_mask):
+                            print(f"Invalid subnet mask detected: {subnet_mask}")
+                            subnet_mask = input("Please enter a valid subnet mask (e.g., 255.255.255.0 or /24): ").strip()
 
                         # Generate object name
                         object_name = generate_object_name(name, ip_address, subnet_mask)
@@ -125,14 +128,14 @@ def load_customer_file():
                     name, ip_address, subnet_mask = [str(value).strip() for value in row[:3]]
                     service = str(int(row[3])).strip() if len(row) > 3 and pd.notna(row[3]) else ''
 
-                    # New IP and subnet validation with user prompts to correct invalid entries
+                    # Validate IP address and subnet mask
                     while not validate_ip_address(ip_address):
                         print(f"Invalid IP address detected: {ip_address}")
                         ip_address = input("Please enter a valid IP Address: ").strip()
 
-                   while not validate_subnet_mask(subnet_mask):
-                       print(f"Invalid subnet mask detected: {subnet_mask}")
-                       subnet_mask = input("Please enter a valid subnet mask (e.g., 255.255.255.0 or /24): ").strip()
+                    while not validate_subnet_mask(subnet_mask):
+                        print(f"Invalid subnet mask detected: {subnet_mask}")
+                        subnet_mask = input("Please enter a valid subnet mask (e.g., 255.255.255.0 or /24): ").strip()
 
                     # Generate object name
                     object_name = generate_object_name(name, ip_address, subnet_mask)
@@ -158,6 +161,7 @@ def load_customer_file():
             choice = input("Would you like to enter the data manually instead? (y/n): ").strip().lower()
             if choice == 'y':
                 return collect_manual_input()
+
 
 # Collect manual input from the user
 def collect_manual_input():
