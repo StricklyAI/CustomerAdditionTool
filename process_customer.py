@@ -214,18 +214,20 @@ def generate_yaml_filename(customers):
 # Main function to handle file input, manual input, and output
 def main():
     try:
-        print("Please choose an input method:")
-        print("1. File Input (CSV)")
-        print("2. Manual Input")
-        choice = input("Enter your choice (1 or 2): ").strip()
+        while True:
+            print("Please choose an input method:")
+            print("1. File Input (CSV)")
+            print("2. Manual Input")
+            choice = input("Enter your choice (1 or 2): ").strip()
 
-        if choice == '1':
-            customers = load_customer_file()
-        elif choice == '2':
-            customers = collect_manual_input()
-        else:
-            print("Invalid choice. Please enter 1 or 2.")
-            return
+            if choice == '1':
+                customers = load_customer_file()
+                break
+            elif choice == '2':
+                customers = collect_manual_input()
+                break
+            else:
+                print("Invalid choice. Please enter 1 or 2.")
 
         validated_customers = preview_and_edit(customers)
 
