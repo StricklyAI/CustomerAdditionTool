@@ -3,8 +3,8 @@
   connection: local
   gather_facts: no
 
-  vars:
-    customer_file: "customers.yml"  # Path to the generated customer YAML file
+  vars_files:
+    - panorama_credentials.yml
 
   tasks:
     - name: Load customer YAML file
@@ -15,9 +15,9 @@
     - name: Configure objects in Panorama
       panos_object:
         provider:
-          ip_address: "{{ panorama_ip }}"
-          username: "{{ panorama_username }}"
-          password: "{{ panorama_password }}"
+          ip_address: "{{ panorama_credentials.ip_address }}"
+          username: "{{ panorama_credentials.username }}"
+          password: "{{ panorama_credentials.password }}"
         object_type: "address"
         name: "{{ item.ObjectName }}"
         value: "{{ item.CustomerIPAddress }}/{{ item.IPSubnetMask }}"
@@ -27,14 +27,14 @@
     - name: Commit configuration in Panorama
       panos_commit:
         provider:
-          ip_address: "{{ panorama_ip }}"
-          username: "{{ panorama_username }}"
-          password: "{{ panorama_password }}"
+          ip_address: "{{ panorama_credentials.ip_address }}"
+          username: "{{ panorama_credentials.username }}"
+          password: "{{ panorama_credentials.password }}"
 
     - name: Push configuration to Firewall
       panos_push:
         provider:
-          ip_address: "{{ panorama_ip }}"
-          username: "{{ panorama_username }}"
-          password: "{{ panorama_password }}"
+          ip_address: "{{ panorama_credentials.ip_address }}"
+          username: "{{ panorama_credentials.username }}"
+          password: "{{ panorama_credentials.password }}"
         devicegroup: "{{ firewall_devicegroup }}"
