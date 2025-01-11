@@ -1,3 +1,9 @@
+import os
+
+# Save the entire code to a Python file for the user to download
+file_path = '/mnt/data/customer_data_processing.py'
+
+code_content = """
 import pandas as pd
 import yaml
 import os
@@ -75,21 +81,21 @@ def validate_subnet_mask(subnet_mask):
 # Load customer data from file without headers
 def load_customer_file():
     while True:
-        file_path = input("Enter the path to the CSV file (no headers required): ").strip()
+        file_path = input("Enter the path to the file (CSV or Excel, no headers required): ").strip()
         if os.path.exists(file_path):
             if file_path.endswith('.csv'):
                 customers = []
                 with open(file_path, 'r') as file:
                     for line in file:
                         fields = line.strip().split(',')
-                        if len(fields) < 4:
-                            print("Error: Each row must have at least CustomerName, CustomerIPAddress, IPSubnetMask, and Service.")
+                        if len(fields) < 3:
+                            print("Error: Each row must have at least CustomerName, CustomerIPAddress, and IPSubnetMask.")
                             continue
 
                         name = fields[0].strip()
                         ip_address = fields[1].strip()
                         subnet_mask = fields[2].strip()
-                        service = fields[3].strip()
+                        service = fields[3].strip() if len(fields) > 3 else ''
 
                         # Validate IP address and subnet mask
                         if not validate_ip_address(ip_address):
@@ -102,7 +108,7 @@ def load_customer_file():
 
                         # Map service to tag
                         tag = tag_mapping.get(service)
-                        if not tag:
+                        if not tag and service:
                             print(f"Warning: The tag for service '{service}' is undefined.")
                             tag = input("Please enter a tag for this service, or leave it blank to skip: ").strip()
 
@@ -114,8 +120,42 @@ def load_customer_file():
                             'ObjectName': object_name
                         })
                 return customers
+            elif file_path.endswith(('.xlsx', '.xls')):
+                df = pd.read_excel(file_path, header=None)
+                customers = []
+                for row in df.itertuples(index=False):
+                    if len(row) < 3:
+                        print("Error: Each row must have at least CustomerName, CustomerIPAddress, and IPSubnetMask.")
+                        continue
+
+                    name, ip_address, subnet_mask = [str(value).strip() for value in row[:3]]
+                    service = str(row[3]).strip() if len(row) > 3 else ''
+
+                    # Validate IP address and subnet mask
+                    if not validate_ip_address(ip_address):
+                        continue
+                    if not validate_subnet_mask(subnet_mask):
+                        continue
+
+                    # Generate object name
+                    object_name = generate_object_name(name, ip_address, subnet_mask)
+
+                    # Map service to tag
+                    tag = tag_mapping.get(service)
+                    if not tag and service:
+                        print(f"Warning: The tag for service '{service}' is undefined.")
+                        tag = input("Please enter a tag for this service, or leave it blank to skip: ").strip()
+
+                    customers.append({
+                        'CustomerName': name,
+                        'CustomerIPAddress': ip_address,
+                        'IPSubnetMask': subnet_mask,
+                        'Tags': [tag] if tag else [],
+                        'ObjectName': object_name
+                    })
+                return customers
             else:
-                print("Unsupported file format. Please provide a CSV file.")
+                print("Unsupported file format. Please provide a CSV or Excel file.")
         else:
             print("File not found.")
             choice = input("Would you like to enter the data manually instead? (y/n): ").strip().lower()
@@ -140,9 +180,9 @@ def collect_manual_input():
         while not validate_subnet_mask(subnet_mask):
             subnet_mask = input("Please enter a valid IP Subnet Mask (e.g., 255.255.255.0 or /24): ").strip()
 
-        service = input("Enter Service: ").strip()
+        service = input("Enter Service (optional): ").strip()
         tag = tag_mapping.get(service)
-        if not tag:
+        if not tag and service:
             print(f"Warning: The tag for service '{service}' is undefined.")
             tag = input("Please enter a tag for this service, or leave it blank to skip: ").strip()
 
@@ -224,7 +264,7 @@ def main():
     try:
         while True:
             print("Please choose an input method:")
-            print("1. File Input (CSV)")
+            print("1. File Input (CSV or Excel)")
             print("2. Manual Input")
             choice = input("Enter your choice (1 or 2): ").strip()
 
