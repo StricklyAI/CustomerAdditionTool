@@ -77,38 +77,45 @@ def validate_tags(tags):
             print(f"Invalid tag: {tag}. Only alphanumeric characters, underscores, and dashes are allowed with no spaces.")
     return valid_tags
 
-# Validate customer record fields
-def validate_customer_record(customer):
-    required_fields = ['CustomerName', 'CustomerIPAddress', 'IPSubnetMask']
-    for field in required_fields:
-        if field not in customer or not customer[field]:
-            print(f"Error: Missing required field '{field}' in customer record. Please check your input file.")
-            return False
-    return True
-
-# Load customer data from file
+# Load customer data from file without headers
 def load_customer_file():
     while True:
-        file_path = input("Enter the path to the Excel or CSV file: ").strip()
+        file_path = input("Enter the path to the CSV file (no headers required): ").strip()
         if os.path.exists(file_path):
             if file_path.endswith('.csv'):
-                customers = pd.read_csv(file_path).to_dict(orient='records')
-            elif file_path.endswith(('.xlsx', '.xls')):
-                customers = pd.read_excel(file_path).to_dict(orient='records')
+                customers = []
+                with open(file_path, 'r') as file:
+                    for line in file:
+                        fields = line.strip().split(',')
+                        if len(fields) < 3:
+                            print("Error: Each row must have at least CustomerName, CustomerIPAddress, and IPSubnetMask.")
+                            continue
+
+                        name = fields[0].strip()
+                        ip_address = fields[1].strip()
+                        subnet_mask = fields[2].strip()
+                        tags = fields[3].strip() if len(fields) > 3 else ''
+
+                        # Validate IP address and subnet mask
+                        if not validate_ip_address(ip_address):
+                            continue
+                        if not validate_subnet_mask(subnet_mask):
+                            continue
+
+                        # Generate object name and validate tags
+                        object_name = generate_object_name(name, ip_address, subnet_mask)
+                        valid_tags = validate_tags(tags)
+
+                        customers.append({
+                            'CustomerName': name,
+                            'CustomerIPAddress': ip_address,
+                            'IPSubnetMask': subnet_mask,
+                            'Tags': valid_tags,
+                            'ObjectName': object_name
+                        })
+                return customers
             else:
-                print("Unsupported file format. Please provide a CSV or Excel file.")
-                continue
-            
-            # Validate each customer record
-            validated_customers = []
-            for customer in customers:
-                if validate_customer_record(customer):
-                    object_name = generate_object_name(
-                        customer['CustomerName'], customer['CustomerIPAddress'], customer['IPSubnetMask']
-                    )
-                    customer['ObjectName'] = object_name
-                    validated_customers.append(customer)
-            return validated_customers
+                print("Unsupported file format. Please provide a CSV file.")
         else:
             print("File not found.")
             choice = input("Would you like to enter the data manually instead? (y/n): ").strip().lower()
@@ -208,7 +215,7 @@ def generate_yaml_filename(customers):
 def main():
     try:
         print("Please choose an input method:")
-        print("1. File Input (CSV/Excel)")
+        print("1. File Input (CSV)")
         print("2. Manual Input")
         choice = input("Enter your choice (1 or 2): ").strip()
 
