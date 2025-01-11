@@ -1,9 +1,3 @@
-import os
-
-# Save the entire code to a Python file for the user to download
-file_path = '/mnt/data/customer_data_processing.py'
-
-code_content = """
 import pandas as pd
 import yaml
 import os
