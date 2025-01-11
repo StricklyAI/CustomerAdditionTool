@@ -165,7 +165,6 @@ def load_customer_file():
             if choice == 'y':
                 return collect_manual_input()
 
-
 # Collect manual input from the user
 def collect_manual_input():
     customers = []
