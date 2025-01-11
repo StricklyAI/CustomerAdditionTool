@@ -89,7 +89,7 @@ def load_customer_file():
                         name = fields[0].strip()
                         ip_address = fields[1].strip()
                         subnet_mask = fields[2].strip()
-                        service = fields[3].strip() if len(fields) > 3 else ''
+                        service = str(int(row[3])).strip() if len(row) > 3 and pd.notna(row[3]) else ''
 
                         # Validate IP address and subnet mask
                         if not validate_ip_address(ip_address):
