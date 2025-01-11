@@ -1,15 +1,16 @@
-# YAML playbook to automate Panorama configuration
-
 - name: Push Customer Configurations to Panorama
   hosts: panorama
   connection: local
   gather_facts: no
 
+  vars:
+    customer_file: "customers.yml"  # Path to the generated customer YAML file
+
   tasks:
-    - name: Load customer configurations
+    - name: Load customer YAML file
       include_vars:
-        dir: "customer_configs"
-        extensions: [".yml"]
+        file: "{{ customer_file }}"
+      register: customer_data
 
     - name: Configure objects in Panorama
       panos_object:
@@ -21,7 +22,7 @@
         name: "{{ item.ObjectName }}"
         value: "{{ item.CustomerIPAddress }}/{{ item.IPSubnetMask }}"
         tags: "{{ item.Tags }}"
-      with_items: "{{ customers }}"
+      loop: "{{ customer_data.customers }}"
 
     - name: Commit configuration in Panorama
       panos_commit:
