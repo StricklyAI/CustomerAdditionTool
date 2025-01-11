@@ -1,0 +1,39 @@
+# YAML playbook to automate Panorama configuration
+
+- name: Push Customer Configurations to Panorama
+  hosts: panorama
+  connection: local
+  gather_facts: no
+
+  tasks:
+    - name: Load customer configurations
+      include_vars:
+        dir: "customer_configs"
+        extensions: [".yml"]
+
+    - name: Configure objects in Panorama
+      panos_object:
+        provider:
+          ip_address: "{{ panorama_ip }}"
+          username: "{{ panorama_username }}"
+          password: "{{ panorama_password }}"
+        object_type: "address"
+        name: "{{ item.ObjectName }}"
+        value: "{{ item.CustomerIPAddress }}/{{ item.IPSubnetMask }}"
+        tags: "{{ item.Tags }}"
+      with_items: "{{ customers }}"
+
+    - name: Commit configuration in Panorama
+      panos_commit:
+        provider:
+          ip_address: "{{ panorama_ip }}"
+          username: "{{ panorama_username }}"
+          password: "{{ panorama_password }}"
+
+    - name: Push configuration to Firewall
+      panos_push:
+        provider:
+          ip_address: "{{ panorama_ip }}"
+          username: "{{ panorama_username }}"
+          password: "{{ panorama_password }}"
+        devicegroup: "{{ firewall_devicegroup }}"
