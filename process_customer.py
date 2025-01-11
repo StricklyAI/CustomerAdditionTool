@@ -173,6 +173,9 @@ def collect_manual_input():
         if name.lower() == 'done':
             break
 
+        # Remove apostrophes from the name for object name creation
+        sanitized_name = name.replace("'", "")
+
         ip_address = input("Enter Customer IP Address: ").strip()
         while not validate_ip_address(ip_address):
             print(f"Invalid IP address detected: {ip_address}")
@@ -189,7 +192,7 @@ def collect_manual_input():
             print(f"Warning: The tag for service '{service}' is undefined.")
             tag = input("Please enter a tag for this service, or leave it blank to skip: ").strip()
 
-        object_name = generate_object_name(name, ip_address, subnet_mask)
+        object_name = generate_object_name(sanitized_name, ip_address, subnet_mask)
 
         customers.append({
             'CustomerName': name,
@@ -200,6 +203,7 @@ def collect_manual_input():
         })
 
     return customers
+
 
 # Function to allow the user to preview, edit, or delete customer data
 def preview_and_edit(customers):
