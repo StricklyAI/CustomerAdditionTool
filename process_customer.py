@@ -173,11 +173,15 @@ def collect_manual_input():
         if name.lower() == 'done':
             break
 
-        # Validate IP address and subnet mask
-        if not validate_ip_address(ip_address):
-            continue
-        if not validate_subnet_mask(subnet_mask):
-            continue
+        ip_address = input("Enter Customer IP Address: ").strip()
+        while not validate_ip_address(ip_address):
+            print(f"Invalid IP address detected: {ip_address}")
+            ip_address = input("Please enter a valid Customer IP Address: ").strip()
+
+        subnet_mask = input("Enter IP Subnet Mask (e.g., 255.255.255.0 or /24): ").strip()
+        while not validate_subnet_mask(subnet_mask):
+            print(f"Invalid subnet mask detected: {subnet_mask}")
+            subnet_mask = input("Please enter a valid IP Subnet Mask (e.g., 255.255.255.0 or /24): ").strip()
 
         service = input("Enter Service (optional): ").strip()
         tag = tag_mapping.get(service)
