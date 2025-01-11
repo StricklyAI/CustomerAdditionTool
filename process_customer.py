@@ -125,11 +125,14 @@ def load_customer_file():
                     name, ip_address, subnet_mask = [str(value).strip() for value in row[:3]]
                     service = str(int(row[3])).strip() if len(row) > 3 and pd.notna(row[3]) else ''
 
-                    # Validate IP address and subnet mask
-                    if not validate_ip_address(ip_address):
-                        continue
-                    if not validate_subnet_mask(subnet_mask):
-                        continue
+                    # New IP and subnet validation with user prompts to correct invalid entries
+                    while not validate_ip_address(ip_address):
+                        print(f"Invalid IP address detected: {ip_address}")
+                        ip_address = input("Please enter a valid IP Address: ").strip()
+
+                   while not validate_subnet_mask(subnet_mask):
+                       print(f"Invalid subnet mask detected: {subnet_mask}")
+                       subnet_mask = input("Please enter a valid subnet mask (e.g., 255.255.255.0 or /24): ").strip()
 
                     # Generate object name
                     object_name = generate_object_name(name, ip_address, subnet_mask)
